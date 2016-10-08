@@ -1,0 +1,12 @@
+{
+  "name":"Fingerprint",
+  "id":"96464163",
+  "version": "0.1.0",
+  "src": "src",
+  "dist": "dist",
+  "main": "index.html",
+  "icon": "Icon.png",
+  "developer": "Ethan Gill",
+  "category":"Monitoring",
+  "type":"RemoteLow"
+}

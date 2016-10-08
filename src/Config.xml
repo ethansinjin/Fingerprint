@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<gmWebApp>
+  <AppID>96464163</AppID>
+  <AppType>RemoteLow</AppType>
+  <FriendlyName>Fingerprint</FriendlyName>
+  <VehicleStatus>Drive</VehicleStatus>
+  <AutoStart>false</AutoStart>
+  <AppCategory>Monitoring</AppCategory>
+  <IconURL>Icon.png</IconURL>
+  <MainURL>index.html</MainURL>
+  <AppVersion>0.1.0</AppVersion>
+  <SetupURL>setup.html</SetupURL>
+  <LocalPath>App96464163</LocalPath>
+  <Developer>Ethan Gill</Developer>
+  <TrustedApp>false</TrustedApp>
+  <RequestedBy>1</RequestedBy>
+  <TestApp>true</TestApp>
+  <VIN>ALLVINS</VIN>
+  <Description>
+    <de>Hallo Welt!</de>
+    <en>Hellow World!</en>
+    <es>Hola Mundo!</es>
+    <fr>Bonjour le monde!</fr>
+    <it>Ciao mondo!</it>
+    <nl>Hallo Wereld!</nl>
+    <pl>Witaj świecie!</pl>
+    <pt>Olá Mundo!</pt>
+  </Description>
+</gmWebApp>
