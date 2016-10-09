@@ -153,8 +153,26 @@ function listDriversForTraining(result) {
   // show a driver button for each of the names
   // also show a new driver button
   // regardless of which button pressed, train the data
-
 }
+
+function addDriverButton(userName) {
+  //Create an input type dynamically.
+  var element = document.createElement("input");
+  //Assign different attributes to the element.
+  element.type = "button";
+  element.value = userName; // Really? You want the default value to be the type string?
+  element.name = userName; // And the name too?
+  element.onclick = function() { // Note this is a function
+    alert("blabla");
+  };
+
+  var foo = document.getElementById("fooBar");
+  //Append the element in page (in span).
+  foo.appendChild(element);
+}
+document.getElementById("btnAdd").onclick = function() {
+  add("text");
+};
 
 $( ".driver-select-manual" ).mousedown(showInputNewDriverScreen);
 function showInputNewDriverScreen() {

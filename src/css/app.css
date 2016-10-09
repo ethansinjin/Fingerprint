@@ -452,3 +452,27 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#95ff29', end
 box-shadow: none;
 
 }
+
+input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: none;
+    background-color: #3CBC8D;
+    color: white;
+    background-image: url('http://www.iconsdb.com/icons/preview/white/steering-wheel-xxl.png');
+    background-position: 10px 7px;
+    background-size: 40px 40px;
+    background-repeat: no-repeat;
+    padding-left: 20px;
+
+    font-size: 24px;
+    text-align: center;
+}
+
+
+form {
+  color: #ffffff;
+  font-size: 130%
+}
