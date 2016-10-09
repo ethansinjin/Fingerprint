@@ -22,6 +22,7 @@ var guessDriverPage = document.getElementById("guess-driver");
 var newDriverPage = document.getElementById("new-driver");
 var statsPage = document.getElementById("stats-page");
 var readyToDrivePage = document.getElementById("start-drive");
+var graphsPage = document.getElementById("graphs-page");
 
 
 
@@ -30,6 +31,7 @@ guessDriverPage.style.display = 'none';
 newDriverPage.style.display = 'none';
 //readyToDrivePage.style.display = 'none';
 statsPage.style.display = 'none';
+graphsPage.style.display = 'none';
 hideBoth();
 
 function resetToStart() {
@@ -38,6 +40,7 @@ function resetToStart() {
   newDriverPage.style.display = 'none';
   readyToDrivePage.style.display = 'block';
   statsPage.style.display = 'none';
+  graphsPage.style.display = 'none';
 }
 
 function watchSpeedCallback(speed) {
@@ -71,6 +74,7 @@ function startDrive() {
   guessDriverPage.style.display = 'none';
   newDriverPage.style.display = 'none';
   statsPage.style.display = 'block';
+  graphsPage.style.display = 'block';
 }
 
 function processData(data) {
@@ -90,6 +94,7 @@ function processData(data) {
     acceleratorPositionData.push(lastAccelerator);
   } else {
     acceleratorPositionData.push(0);
+      setupGraphs();
   }
   if (data.wheel_angle) {
     lastWheelAngle = data.wheel_angle;
@@ -120,6 +125,7 @@ function stopDrive() {
   guessDriverPage.style.display = 'block';
   newDriverPage.style.display = 'none';
   statsPage.style.display = 'none';
+  graphsPage.style.display = 'none';
   document.getElementById("guess-no").style.display = 'none';
   document.getElementById("guess-yes").style.display = 'none';
 
@@ -141,6 +147,7 @@ function stopDrive() {
         guessDriverPage.style.display = 'none';
         newDriverPage.style.display = 'none';
         statsPage.style.display = 'none';
+        graphsPage.style.display = 'none';
         wcc.callListDrivers(function(result) {
           namesArray = result.split(",");
 
@@ -162,6 +169,7 @@ function stopDrive() {
         guessDriverPage.style.display = 'block';
         newDriverPage.style.display = 'none';
         statsPage.style.display = 'none';
+        graphsPage.style.display = 'none';
       }
     });
   });
@@ -195,6 +203,7 @@ function showInputNewDriverScreen() {
   guessDriverPage.style.display = 'none';
   newDriverPage.style.display = 'block';
   statsPage.style.display = 'none';
+  graphsPage.style.display = 'none';
 }
 
 $("#driver-manual-done").mousedown(classifyCustom);
@@ -393,68 +402,74 @@ function handleRotary(eventlist) {
     }
   }
 }
-
 // graphs
 
-var svg = d3.select(svg),
-    margin = {top: 0, right: 0, bottom: 1, left: 1},
-    width = +svg.attr("width") - margin.left - margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom,
-    gSpeed = svg.append("gSpeed").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
-    gRPM = svg.append("gRPM").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+var svg, margin, width, height, gSpeed, gRPM, x, ySpeed, yRPM, lineSpeed, lineRPM;
 
-var x = d3.scaleLinear()
-    .domain([0, size - 1])
-    .range([0, width]);
+function setupGraphs() {
+   svg = d3.select(svg),
+      margin = {top: 0, right: 0, bottom: 1, left: 1},
+      width = +svg.attr("width") - margin.left - margin.right,
+      height = +svg.attr("height") - margin.top - margin.bottom,
+      gSpeed = svg.append("gSpeed").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+      gRPM = svg.append("gRPM").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var ySpeed = d3.scaleLinear()
-    .domain([0, 200])
-    .range([height, 0]);
+   x = d3.scaleLinear()
+      .domain([0, size - 1])
+      .range([0, width]);
 
-var yRPM = d3.scaleLinear()
-    .domain([0, 100])
-    .range([height, 0]);
+   ySpeed = d3.scaleLinear()
+      .domain([0, 200])
+      .range([height, 0]);
 
-var lineSpeed = d3.line()
-    .x(function(d,i) { return x(i); })
-    .y(function(d,i) { return ySpeed(d); });
+   yRPM = d3.scaleLinear()
+      .domain([0, 100])
+      .range([height, 0]);
 
-var lineRPM = d3.line()
-    .x(function(d,i) { return x(i); })
-    .y(function(d,i) { return yRPM(d); });
+   lineSpeed = d3.line()
+      .x(function(d,i) { return x(i); })
+      .y(function(d,i) { return ySpeed(d); });
 
-gRPM.append("defs").append("clipPath")
-        .attr("id", "clip")
-        .append("rect")
-        .attr("width", width)
-        .attr("height", height);
-    gRPM.append("gRPM")
-        .attr("class", "axis axis--x")
-        .attr("transform", "translate(0," + yRPM(0) + ")")                      .call(d3.axisBottom(x));
-    gRPM.append("gRPM")
-        .attr("class", "axis axis--yRPM")
-        .call(d3.axisLeft(yRPM));
-    gRPM.append("gRPM")
-        .attr("clip-path", "url(#clip)")
-        .append("path")
-        .datum(acceleratorPositionData)
-        .attr("class", "lineSpeed")
-        .transition()
-        .duration(500)
-        .ease(d3.easeLinear)
-        .on("start", processData);
+   lineRPM = d3.line()
+      .x(function(d,i) { return x(i); })
+      .y(function(d,i) { return yRPM(d); });
 
-        function show_gSpeed() {
-            d3.selectAll("gSpeed").attr("visibility", "visible");
-            d3.selectAll("gRPM").attr("visibility", "hidden");
-        }
+      gRPM.append("defs").append("clipPath")
+          .attr("id", "clip")
+          .append("rect")
+          .attr("width", width)
+          .attr("height", height);
+      gRPM.append("gRPM")
+          .attr("class", "axis axis--x")
+          .attr("transform", "translate(0," + yRPM(0) + ")")                      .call(d3.axisBottom(x));
+      gRPM.append("gRPM")
+          .attr("class", "axis axis--yRPM")
+          .call(d3.axisLeft(yRPM));
+      gRPM.append("gRPM")
+          .attr("clip-path", "url(#clip)")
+          .append("path")
+          .datum(acceleratorPositionData)
+          .attr("class", "lineSpeed")
+          .transition()
+          .duration(500)
+          .ease(d3.easeLinear)
+          .on("start", processData);
+}
 
-        function show_gRPM() {
-            d3.selectAll("gSpeed").attr("visibility", "hidden");
-            d3.selectAll("gRPM").attr("visibility", "visible");
-        }
+    function show_gSpeed() {
+      console.log("showing speed graph");
+        d3.selectAll("gSpeed").attr("visibility", "visible");
+        d3.selectAll("gRPM").attr("visibility", "hidden");
+    }
 
-        function hideBoth() {
-            d3.selectAll("gSpeed").attr("visibility", "hidden");
-            d3.selectAll("gRPM").attr("visibility", "hidden");
-        }
+    function show_gRPM() {
+      console.log("showing RPM graph");
+        d3.selectAll("gSpeed").attr("visibility", "hidden");
+        d3.selectAll("gRPM").attr("visibility", "visible");
+    }
+
+    function hideBoth() {
+      console.log("hiding both graphs");
+        d3.selectAll("gSpeed").attr("visibility", "hidden");
+        d3.selectAll("gRPM").attr("visibility", "hidden");
+    }

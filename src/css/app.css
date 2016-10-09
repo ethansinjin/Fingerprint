@@ -167,6 +167,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 /*width:100%;*/
 }
 
+#graphs-page {
+  position:absolute;
+  left:200px;
+}
+
 #status-header {
 font-size: 35px;
 line-height: 35px;
@@ -372,6 +377,12 @@ border-top: 2px solid #4fff5f;
 left: 0;
 top: 50%;
 
+}
+
+.line {
+  fill:none;
+  stroke:#fff;
+  stroke-width:1.5px;
 }
 
 /*GRAD SHAD */
