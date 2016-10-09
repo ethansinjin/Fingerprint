@@ -30,6 +30,7 @@ guessDriverPage.style.display = 'none';
 newDriverPage.style.display = 'none';
 //readyToDrivePage.style.display = 'none';
 statsPage.style.display = 'none';
+hideBoth();
 
 function resetToStart() {
   pickDriverPage.style.display = 'none';
@@ -63,6 +64,7 @@ function startDrive() {
   // document.getElementById("subtitle").innerHTML = "There should be stats here but someone didn't get them done in time for demos";
   dataListener = gm.info.watchVehicleData(processData,processDataError,['brake_position','accelerator_position','wheel_angle'],100);
   rotaryWatcher = gm.info.watchRotaryControl(handleRotary);
+
 
   readyToDrivePage.style.display = 'none';
   pickDriverPage.style.display = 'none';
@@ -110,6 +112,7 @@ function stopDrive() {
   console.log('brake array: ', brakePositionData);
   console.log('acceleration array', acceleratorPositionData);
   console.log('wheel angle array', wheelAngleData);
+  hideBoth();
   document.getElementById("guess-h1").innerHTML = "Drive Finished";
   document.getElementById("guess-h2").innerHTML = "Just one second while we crunch some numbers";
   readyToDrivePage.style.display = 'none';
@@ -183,7 +186,7 @@ function addDriverButton(userName) {
   });
 }
 
-$( ".driver-select-manual" ).mousedown(showInputNewDriverScreen);
+$( "#driver-select-manual" ).mousedown(showInputNewDriverScreen);
 function showInputNewDriverScreen() {
   //TODO: show the screen for manually inputting a driver name
   // TODO: use the driver name that was input to train the data, so it improves in the future
@@ -192,6 +195,17 @@ function showInputNewDriverScreen() {
   guessDriverPage.style.display = 'none';
   newDriverPage.style.display = 'block';
   statsPage.style.display = 'none';
+}
+
+$("#driver-manual-done").mousedown(classifyCustom);
+function classifyCustom(){
+  console.log("training function with:");
+  console.log(userName);
+  var userName = document.getElementById("driver-name-asdf").value;
+  var wcc = new WolframCloudCall();
+  wcc.callTrainClassify(seconds,userName,function(result) {
+    resetToStart();
+  });
 }
 
 /*
@@ -273,7 +287,7 @@ p.callClassify = function(key, callback) {
 };
 
 p.callTrainClassify = function(key, name, callback) {
-  var url = "http://www.wolframcloud.com/objects/10794676-bfcf-4f2b-bb1a-a970e0b02a98";
+  var url = "https://www.wolframcloud.com/objects/1d56be65-4a5c-4fdc-b78d-965a9a67a612";
   var args = {key: key, name: name};
   var callbackWrapper = function(result) {
     if (result === null) callback(null);
@@ -313,6 +327,7 @@ function selectTopStat() {
 	$(".top").addClass("topGrad");
 	$( ".lineTop" ).show();
   currentlySelected = "top";
+  hideBoth();
 };
 $( ".top" ).mousedown(selectTopStat);
 
@@ -322,6 +337,7 @@ function selectRightStat() {
 	$(".right").addClass("rightGrad");
 	$( ".lineRight" ).show();
   currentlySelected = "right";
+  show_gSpeed();
 };
 $( ".right" ).mousedown(selectRightStat);
 
@@ -331,6 +347,7 @@ function selectBottomStat() {
 	$(".bottom").addClass("bottomGrad");
 	$( ".lineBottom" ).show();
   currentlySelected = "bottom";
+  hideBoth();
 };
 $( ".bottom" ).mousedown(selectBottomStat);
 
@@ -340,6 +357,7 @@ function selectLeftStat() {
 	$(".left").addClass("leftGrad");
 	$( ".lineLeft" ).show();
   currentlySelected = "left";
+  show_gRPM();
 };
 $( ".left" ).mousedown(selectLeftStat);
 
@@ -376,97 +394,67 @@ function handleRotary(eventlist) {
   }
 }
 
-// graph generation
+// graphs
 
-function startGraph() {
+var svg = d3.select(svg),
+    margin = {top: 0, right: 0, bottom: 1, left: 1},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    gSpeed = svg.append("gSpeed").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+    gRPM = svg.append("gRPM").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var svg = d3.select(svg),
-        margin = {top: 0, right: 0, bottom: 1, left: 1},
-        width = +svg.attr("width") - margin.left - margin.right,
-        height = +svg.attr("height") - margin.top - margin.bottom,
-        gSpeed = svg.append("gSpeed").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
-        gRPM = svg.append("gRPM").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+var x = d3.scaleLinear()
+    .domain([0, size - 1])
+    .range([0, width]);
 
-    var x = d3.scaleLinear()
-        .domain([0, size - 1])
-        .range([0, width]);
+var ySpeed = d3.scaleLinear()
+    .domain([0, 200])
+    .range([height, 0]);
 
-    var ySpeed = d3.scaleLinear()
-        .domain([0, 200])
-        .range([height, 0]);
+var yRPM = d3.scaleLinear()
+    .domain([0, 100])
+    .range([height, 0]);
 
-    var yRPM = d3.scaleLinear()
-        .domain([0, 10000])
-        .range([height, 0]);
+var lineSpeed = d3.line()
+    .x(function(d,i) { return x(i); })
+    .y(function(d,i) { return ySpeed(d); });
 
-    var lineSpeed = d3.line()
-        .x(function(d,i) { return x(i); })
-        .y(function(d,i) { return ySpeed(d); });
+var lineRPM = d3.line()
+    .x(function(d,i) { return x(i); })
+    .y(function(d,i) { return yRPM(d); });
 
-    var lineRPM = d3.line()
-        .x(function(d,i) { return x(i); })
-        .y(function(d,i) { return yRPM(d); });
-
-    // speed graph
-/*    gSpeed.append("defs").append("clipPath")
+gRPM.append("defs").append("clipPath")
         .attr("id", "clip")
         .append("rect")
         .attr("width", width)
         .attr("height", height);
-    gSpeed.append("gSpeed")
+    gRPM.append("gRPM")
         .attr("class", "axis axis--x")
-        .attr("transform", "translate(0," + ySpeed(0) + ")")
-        .call(d3.axisBottom(x));
-    gSpeed.append("gSpeed")
-        .attr("class", "axis axis--ySpeed")
-        .call(d3.axisLeft(ySpeed));
-    gSpeed.append("gSpeed")
+        .attr("transform", "translate(0," + yRPM(0) + ")")                      .call(d3.axisBottom(x));
+    gRPM.append("gRPM")
+        .attr("class", "axis axis--yRPM")
+        .call(d3.axisLeft(yRPM));
+    gRPM.append("gRPM")
         .attr("clip-path", "url(#clip)")
         .append("path")
-        .datum(speedData)
+        .datum(acceleratorPositionData)
         .attr("class", "lineSpeed")
         .transition()
         .duration(500)
         .ease(d3.easeLinear)
-        .on("start", tickSpeed)*/
+        .on("start", processData);
 
-    // rpm graph
-    gRPM.append("defs").append("clipPath")
-            .attr("id", "clip")
-            .append("rect")
-            .attr("width", width)
-            .attr("height", height);
-        gRPM.append("gRPM")
-            .attr("class", "axis axis--x")
-            .attr("transform", "translate(0," + yRPM(0) + ")")
-            .call(d3.axisBottom(x));
-        gRPM.append("gRPM")
-            .attr("class", "axis axis--yRPM")
-            .call(d3.axisLeft(yRPM));
-        gRPM.append("gRPM")
-            .attr("clip-path", "url(#clip)")
-            .append("path")
-            .datum(acceleratorPositionData)
-            .attr("class", "lineSpeed")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .on("start", processData)
+        function show_gSpeed() {
+            d3.selectAll("gSpeed").attr("visibility", "visible");
+            d3.selectAll("gRPM").attr("visibility", "hidden");
+        }
 
+        function show_gRPM() {
+            d3.selectAll("gSpeed").attr("visibility", "hidden");
+            d3.selectAll("gRPM").attr("visibility", "visible");
+        }
 
-}
-
-function show_gSpeed() {
-    d3.selectAll("gSpeed").attr("visibility", "visible");
-    d3.selectAll("gRPM").attr("visibility", "hidden");
-}
-
-function show_gRPM() {
-    d3.selectAll("gSpeed").attr("visibility", "hidden");
-    d3.selectAll("gRPM").attr("visibility", "visible");
-}
-
-function hideBoth() {
-    d3.selectAll("gSpeed").attr("visibility", "hidden");
-    d3.selectAll("gRPM").attr("visibility", "hidden");
-}
+        function hideBoth() {
+            d3.selectAll("gSpeed").attr("visibility", "hidden");
+            d3.selectAll("gRPM").attr("visibility", "hidden");
+        }
