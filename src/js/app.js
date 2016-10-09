@@ -12,6 +12,13 @@ var lastBrake;
 var lastAccelerator;
 var lastWheelAngle;
 
+var startUpPage = document.getElementById("start-up-page")
+var newDriverPage = document.getElementById("new-driver");
+var statsPage = document.getElementById("stats-page");
+
+newDriverPage.style.display = 'none';
+startUpPage.style.display = 'none';
+
 function watchSpeedCallback(speed) {
   if (speed == 0 && previousSpeed > 0) {
     //stop the drive
@@ -185,3 +192,38 @@ p.callClassify = function(key, callback) {
 //List Drivers
 
 })();
+
+// Dashboard JS
+
+function resetDash() {
+	$(".icon").removeClass("topGrad rightGrad bottomGrad leftGrad");
+	$(".lines").hide();
+}
+
+$( ".top" ).mouseover(function() {
+	$(".info .inner").css({"left":"0"});
+	resetDash();
+	$(this).addClass("topGrad");
+	$( ".lineTop" ).show();
+});
+
+$( ".right" ).mouseover(function() {
+	$(".info .inner").css({"left":"-110px"});
+	resetDash()
+	$(this).addClass("rightGrad");
+	$( ".lineRight" ).show();
+});
+
+$( ".bottom" ).mouseover(function() {
+	$(".info .inner").css({"left":"-220px"});
+	resetDash()
+	$(this).addClass("bottomGrad");
+	$( ".lineBottom" ).show();
+});
+
+$( ".left" ).mouseover(function() {
+	$(".info .inner").css({"left":"-330px"});
+	resetDash()
+	$(this).addClass("leftGrad");
+	$( ".lineLeft" ).show();
+});
