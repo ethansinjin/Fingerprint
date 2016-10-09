@@ -165,21 +165,22 @@ function stopDrive() {
 }
 
 function addDriverButton(userName) {
-  var driverButton = $('<button/>', {'class': 'btn', 'type': 'button'}).append(
+  var driverButton = $('<button/>', {'class': 'btn', 'type': 'button', 'id': userName}).append(
       $('<span/>', {text: userName})
   );
-  driverButton.mousedown = function() {
-    console.log("training function with:");
-    console.log(userName);
-    wcc.callTrainClassify(seconds,userName,function(result) {
-      resetToStart();
-    });
-  };
   $("#driver-select-button-list").append(
       $('<div/>', {'class': 'col-sm-4'}).append(
         driverButton
       )
   );
+  $("#driver-select-button-list").on("click", "#"+userName, function(){
+    console.log("training function with:");
+    console.log(userName);
+    var wcc = new WolframCloudCall();
+    wcc.callTrainClassify(seconds,userName,function(result) {
+      resetToStart();
+    });
+  });
 }
 
 $( ".driver-select-manual" ).mousedown(showInputNewDriverScreen);
