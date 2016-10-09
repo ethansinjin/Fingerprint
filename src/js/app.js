@@ -1,5 +1,5 @@
 // Your code goes here
-
+var d3 = require("d3");
 var previousSpeed = 0; //0=parked, 1-2=driving
 gm.system.watchSpeed(watchSpeedCallback);
 var dataListener; // id of vehicle data process
@@ -21,6 +21,8 @@ var guessDriverPage = document.getElementById("guess-driver");
 var newDriverPage = document.getElementById("new-driver");
 var statsPage = document.getElementById("stats-page");
 var readyToDrivePage = document.getElementById("start-drive");
+
+
 
 pickDriverPage.style.display = 'none';
 guessDriverPage.style.display = 'none';
@@ -350,19 +352,15 @@ function handleRotary(eventlist) {
 // graph generation
 
 function startGraph() {
-    var size = 40;
-
-    var speedData = d3.map(size),
-        RPMData   = d3.map(size);
 
     var svg = d3.select(svg),
         margin = {top: 0, right: 0, bottom: 1, left: 1},
         width = +svg.attr("width") - margin.left - margin.right,
         height = +svg.attr("height") - margin.top - margin.bottom,
-        gSpeed = svg.append("gSpeed").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        gSpeed = svg.append("gSpeed").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
         gRPM = svg.append("gRPM").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var xSpeed = d3.scaleLinear()
+    var x = d3.scaleLinear()
         .domain([0, size - 1])
         .range([0, width]);
 
@@ -370,12 +368,78 @@ function startGraph() {
         .domain([0, 200])
         .range([height, 0]);
 
-    var xRPM = d3.scaleLinear()
-        .domain([0, size - 1])
-        .range([0, width]);
-
     var yRPM = d3.scaleLinear()
         .domain([0, 10000])
         .range([height, 0]);
 
+    var lineSpeed = d3.line()
+        .x(function(d,i) { return x(i); })
+        .y(function(d,i) { return ySpeed(d); });
+
+    var lineRPM = d3.line()
+        .x(function(d,i) { return x(i); })
+        .y(function(d,i) { return yRPM(d); });
+
+    // speed graph
+/*    gSpeed.append("defs").append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("width", width)
+        .attr("height", height);
+    gSpeed.append("gSpeed")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + ySpeed(0) + ")")
+        .call(d3.axisBottom(x));
+    gSpeed.append("gSpeed")
+        .attr("class", "axis axis--ySpeed")
+        .call(d3.axisLeft(ySpeed));
+    gSpeed.append("gSpeed")
+        .attr("clip-path", "url(#clip)")
+        .append("path")
+        .datum(speedData)
+        .attr("class", "lineSpeed")
+        .transition()
+        .duration(500)
+        .ease(d3.easeLinear)
+        .on("start", tickSpeed)*/
+
+    // rpm graph
+    gRPM.append("defs").append("clipPath")
+            .attr("id", "clip")
+            .append("rect")
+            .attr("width", width)
+            .attr("height", height);
+        gRPM.append("gRPM")
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0," + yRPM(0) + ")")
+            .call(d3.axisBottom(x));
+        gRPM.append("gRPM")
+            .attr("class", "axis axis--yRPM")
+            .call(d3.axisLeft(yRPM));
+        gRPM.append("gRPM")
+            .attr("clip-path", "url(#clip)")
+            .append("path")
+            .datum(acceleratorPositionData)
+            .attr("class", "lineSpeed")
+            .transition()
+            .duration(500)
+            .ease(d3.easeLinear)
+            .on("start", processData)
+
+
+}
+
+function show_gSpeed() {
+    d3.selectAll("gSpeed").attr("visibility", "visible");
+    d3.selectAll("gRPM").attr("visibility", "hidden");
+}
+
+function show_gRPM() {
+    d3.selectAll("gSpeed").attr("visibility", "hidden");
+    d3.selectAll("gRPM").attr("visibility", "visible");
+}
+
+function hideBoth() {
+    d3.selectAll("gSpeed").attr("visibility", "hidden");
+    d3.selectAll("gRPM").attr("visibility", "hidden");
 }
