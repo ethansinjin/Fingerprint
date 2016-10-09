@@ -18,9 +18,9 @@ var newDriverPage = document.getElementById("new-driver");
 var statsPage = document.getElementById("stats-page");
 var readyToDrivePage = document.getElementById("start-drive");
 
-pickDriverPage.style.display = 'none';
+//pickDriverPage.style.display = 'none';
 newDriverPage.style.display = 'none';
-//readyToDrivePage.style.display = 'none';
+readyToDrivePage.style.display = 'none';
 statsPage.style.display = 'none';
 
 function watchSpeedCallback(speed) {
@@ -50,6 +50,8 @@ function startDrive() {
 
   //hide ready to drive
   readyToDrivePage.style.display = 'none';
+  pickDriverPage.style.display = 'none';
+  newDriverPage.style.display = 'none';
   statsPage.style.display = 'block';
 }
 
