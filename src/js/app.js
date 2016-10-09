@@ -9,6 +9,9 @@ var brakePositionData = [];
 var acceleratorPositionData = [];
 var wheelAngleData = [];
 
+var seconds;
+var namesArray = [];
+
 var lastBrake;
 var lastAccelerator;
 var lastWheelAngle;
@@ -19,11 +22,10 @@ var newDriverPage = document.getElementById("new-driver");
 var statsPage = document.getElementById("stats-page");
 var readyToDrivePage = document.getElementById("start-drive");
 
-
 pickDriverPage.style.display = 'none';
 guessDriverPage.style.display = 'none';
 newDriverPage.style.display = 'none';
-readyToDrivePage.style.display = 'none';
+//readyToDrivePage.style.display = 'none';
 statsPage.style.display = 'none';
 
 function watchSpeedCallback(speed) {
@@ -51,9 +53,9 @@ function startDrive() {
   dataListener = gm.info.watchVehicleData(processData,processDataError,['brake_position','accelerator_position','wheel_angle'],100);
   rotaryWatcher = gm.info.watchRotaryControl(handleRotary);
 
-  //hide ready to drive
   readyToDrivePage.style.display = 'none';
   pickDriverPage.style.display = 'none';
+  guessDriverPage.style.display = 'none';
   newDriverPage.style.display = 'none';
   statsPage.style.display = 'block';
 }
@@ -97,31 +99,70 @@ function stopDrive() {
   console.log('brake array: ', brakePositionData);
   console.log('acceleration array', acceleratorPositionData);
   console.log('wheel angle array', wheelAngleData);
-  // document.getElementById("title").innerHTML = "Drive Finished";
-  // document.getElementById("subtitle").innerHTML = "Just one second while we crunch some numbers";
+  document.getElementById("guess-h1").innerHTML = "Drive Finished";
+  document.getElementById("guess-h2").innerHTML = "Just one second while we crunch some numbers";
+  readyToDrivePage.style.display = 'none';
+  pickDriverPage.style.display = 'none';
+  guessDriverPage.style.display = 'block';
+  newDriverPage.style.display = 'none';
+  statsPage.style.display = 'none';
+  document.getElementById("guess-no").style.display = 'none';
+  document.getElementById("guess-yes").style.display = 'none';
 
   gm.info.clearVehicleData(dataListener);
   gm.info.clearRotaryControl(rotaryWatcher);
 
   var wcc = new WolframCloudCall();
   console.log("sending data to wolfram");
-  var seconds = new Date() / 1000; //seconds since epoch
+  seconds = new Date() / 1000; //seconds since epoch
   wcc.call(acceleratorPositionData, brakePositionData, wheelAngleData, seconds, function(result) {
     console.log("data sent");
     console.log(result);
     wcc.callClassify(seconds,function(result) {
       console.log(result);
       if (result == null || result == "Null") {
-        //TODO: handle unsure case
-        // document.getElementById("title").innerHTML = "Who are you?";
-        // document.getElementById("subtitle").innerHTML = "Please let us know";
+        //handle unsure case
+        readyToDrivePage.style.display = 'none';
+        pickDriverPage.style.display = 'block';
+        guessDriverPage.style.display = 'none';
+        newDriverPage.style.display = 'none';
+        statsPage.style.display = 'none';
+        wcc.callListDrivers(listDriversForTraining);
       } else {
-        //TODO: handle sure case
-        // document.getElementById("title").innerHTML = "You must be:";
-        // document.getElementById("subtitle").innerHTML = result;
+        // handle sure case
+        document.getElementById("guess-h1").innerHTML = "Driver Recognized as:";
+        document.getElementById("guess-h2").innerHTML = result;
+        document.getElementById("guess-no").style.display = 'block';
+        document.getElementById("guess-yes").style.display = 'block';
+        readyToDrivePage.style.display = 'none';
+        pickDriverPage.style.display = 'none';
+        guessDriverPage.style.display = 'block';
+        newDriverPage.style.display = 'none';
+        statsPage.style.display = 'none';
       }
     });
   });
+}
+
+function listDriversForTraining(result) {
+  namesArray = result;
+  // assume the correct screen is already being displayed
+  //TODO: iterate through the array 'result'
+  // show a driver button for each of the names
+  // also show a new driver button
+  // regardless of which button pressed, train the data
+
+}
+
+$( ".driver-select-manual" ).mousedown(showInputNewDriverScreen);
+function showInputNewDriverScreen() {
+  //TODO: show the screen for manually inputting a driver name
+  // TODO: use the driver name that was input to train the data, so it improves in the future
+  readyToDrivePage.style.display = 'none';
+  pickDriverPage.style.display = 'none';
+  guessDriverPage.style.display = 'none';
+  newDriverPage.style.display = 'block';
+  statsPage.style.display = 'none';
 }
 
 /*
@@ -183,7 +224,7 @@ p._auxCall = function(url, args, callback) {
 };
 
 p.call = function(accInt, brakeInt, steeringAngle, identifier, callback) {
-	var url = "https://www.wolframcloud.com/objects/77de27df-c176-4003-9669-65f47541afe9";
+	var url = "http://www.wolframcloud.com/objects/77de27df-c176-4003-9669-65f47541afe9";
 	var args = {accInt: accInt, brakeInt: brakeInt, steeringAngle: steeringAngle, identifier: identifier};
 	var callbackWrapper = function(result) {
 		if (result === null) callback(null);
@@ -200,10 +241,27 @@ p.callClassify = function(key, callback) {
     else callback(result);
   };
   this._auxCall(url, args, callbackWrapper);
-}
+};
 
-//https://www.wolframcloud.com/objects/dd2dd629-202b-4706-bfc8-7378a338e141
-//Classify
+p.callTrainClassify = function(key, name, callback) {
+  var url = "http://www.wolframcloud.com/objects/10794676-bfcf-4f2b-bb1a-a970e0b02a98";
+  var args = {key: key, name: name};
+  var callbackWrapper = function(result) {
+    if (result === null) callback(null);
+    else callback(result);
+  };
+  this._auxCall(url, args, callbackWrapper);
+};
+
+p.callListDrivers = function(key, callback) {
+  var url = "http://www.wolframcloud.com/objects/cce7421b-d215-4232-aadb-0ed3ac20c440";
+  var args = {};
+  var callbackWrapper = function(result) {
+    if (result === null) callback(null);
+    else callback(result);
+  };
+  this._auxCall(url, args, callbackWrapper);
+};
 
 //https://www.wolframcloud.com/objects/cce7421b-d215-4232-aadb-0ed3ac20c440
 //List Drivers

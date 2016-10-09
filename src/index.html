@@ -47,7 +47,7 @@
         				<button class="btn red" type="button"><span>Driver 3</span></button>
         			</div>
             	<div></div>
-            	<button class="btn blue" type="button"><span><a href = "NewDriver.html">New Driver</a></span></button>
+            	<button id="driver-select-manual" class="btn blue" type="button"><span><a href = "NewDriver.html">New Driver</a></span></button>
         		</div>
         	</div>
 
@@ -57,19 +57,19 @@
         		<form>
           			<label for="name">Driver Name</label>
           			<input type="text" id="name" name="name">
-          			<button class="btn orange" type="button"><span>Done</span></button>
+          			<button id="driver-manual-done" class="btn orange" type="button"><span>Done</span></button>
         		</form>
         	</div>
 
           <div id="guess-driver">
-            <h1>The Driver is:</h1>
-            <h1>Ethan Gill</h1>
+            <h1 id="guess-h1">Trip Driver Recognized:</h1>
+            <h1 id="guess-h2">Driver Name</h1>
             <div class="row">
               <div class="col-sm-6">
-                <button class="btn" type="button"><span>Yes</span></button>
+                <button id="guess-yes" class="btn" type="button"><span>Yes</span></button>
               </div>
               <div class="col-sm-6">
-                <button class="btn red" type="button"><span>No</span></button>
+                <button id="guess-no" class="btn red" type="button"><span>No</span></button>
               </div>
             </div>
           </div>
