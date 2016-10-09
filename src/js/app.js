@@ -32,6 +32,8 @@ function startDrive() {
   acceleratorPositionData = [];
   wheelAngleData = [];
   console.log('starting drive');
+  document.getElementById("title").innerHTML = "Currently Driving";
+  document.getElementById("subtitle").innerHTML = "There should be stats here but someone didn't get them done in time for demos";
   dataListener = gm.info.watchVehicleData(processData,processDataError,['brake_position','accelerator_position','wheel_angle'],100);
 }
 
@@ -74,6 +76,8 @@ function stopDrive() {
   console.log('brake array: ', brakePositionData);
   console.log('acceleration array', acceleratorPositionData);
   console.log('wheel angle array', wheelAngleData);
+  document.getElementById("title").innerHTML = "Drive Finished";
+  document.getElementById("subtitle").innerHTML = "Just one second while we crunch some numbers";
   gm.info.clearVehicleData(dataListener);
   var wcc = new WolframCloudCall();
   console.log("sending data to wolfram");
@@ -83,10 +87,14 @@ function stopDrive() {
     console.log(result);
     wcc.callClassify(seconds,function(result) {
       console.log(result);
-      if result == null || result == "Null" {
+      if (result == null || result == "Null") {
         //TODO: handle unsure case
+        document.getElementById("title").innerHTML = "Who are you?";
+        document.getElementById("subtitle").innerHTML = "Please let us know";
       } else {
         //TODO: handle sure case
+        document.getElementById("title").innerHTML = "You must be:";
+        document.getElementById("subtitle").innerHTML = result;
       }
     });
   });
