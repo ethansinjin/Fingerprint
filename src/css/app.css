@@ -380,9 +380,9 @@ top: 50%;
 }
 
 .line {
-  fill:none;
-  stroke:#fff;
-  stroke-width:1.5px;
+  fill:none!important;
+  stroke:#fff!important;
+  stroke-width:1.5px!important;
 }
 
 /*GRAD SHAD */

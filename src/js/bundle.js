@@ -16299,6 +16299,7 @@ var wheelAngleData = [];
 
 var seconds;
 var namesArray = [];
+var graphsSetup = false;
 
 var lastBrake;
 var lastAccelerator;
@@ -16355,7 +16356,6 @@ function startDrive() {
   dataListener = gm.info.watchVehicleData(processData,processDataError,['brake_position','accelerator_position','wheel_angle'],100);
   rotaryWatcher = gm.info.watchRotaryControl(handleRotary);
 
-
   readyToDrivePage.style.display = 'none';
   pickDriverPage.style.display = 'none';
   guessDriverPage.style.display = 'none';
@@ -16381,7 +16381,8 @@ function processData(data) {
     acceleratorPositionData.push(lastAccelerator);
   } else {
     acceleratorPositionData.push(0);
-      setupGraphs();
+    setupGraphs();
+    graphsSetup = true;
   }
   if (data.wheel_angle) {
     lastWheelAngle = data.wheel_angle;
@@ -16391,6 +16392,20 @@ function processData(data) {
   } else {
     wheelAngleData.push(0);
   }
+
+  document.getElementById("status-header-acceleration").innerHTML = lastAccelerator;
+  document.getElementById("status-header-braking").innerHTML = lastBrake;
+  document.getElementById("status-header-wheel").innerHTML = lastWheelAngle;
+  if (graphsSetup) {
+  //process the graph that is currently being displayed
+  d3.select("gRPM")
+    .attr("d", lineRPM)
+    .attr("transform", null);
+  d3.active("gRPM")
+    .attr("transform", "translate(" + x(-1) + ",0)")
+    .transition();
+  }
+    // .on("start", processData);
 }
 
 function processDataError() {
@@ -16736,11 +16751,10 @@ function setupGraphs() {
           .attr("clip-path", "url(#clip)")
           .append("path")
           .datum(acceleratorPositionData)
-          .attr("class", "lineSpeed")
-          .transition()
-          .duration(500)
-          .ease(d3.easeLinear)
-          .on("start", processData);
+          .attr("class", "lineSpeed");
+          // .transition()
+          // .duration(500)
+          // .ease(d3.easeLinear)
 }
 
     function show_gSpeed() {
