@@ -3,6 +3,7 @@
 var previousSpeed = 0; //0=parked, 1-2=driving
 gm.system.watchSpeed(watchSpeedCallback);
 var dataListener; // id of vehicle data process
+var rotaryWatcher; //id of rotary watcher process
 
 var brakePositionData = [];
 var acceleratorPositionData = [];
@@ -19,8 +20,8 @@ var readyToDrivePage = document.getElementById("start-drive");
 
 pickDriverPage.style.display = 'none';
 newDriverPage.style.display = 'none';
-readyToDrivePage.style.display = 'none';
-//statsPage.style.display = 'none';
+//readyToDrivePage.style.display = 'none';
+statsPage.style.display = 'none';
 
 function watchSpeedCallback(speed) {
   if (speed == 0 && previousSpeed > 0) {
@@ -42,9 +43,14 @@ function startDrive() {
   acceleratorPositionData = [];
   wheelAngleData = [];
   console.log('starting drive');
-  document.getElementById("title").innerHTML = "Currently Driving";
-  document.getElementById("subtitle").innerHTML = "There should be stats here but someone didn't get them done in time for demos";
+  // document.getElementById("title").innerHTML = "Currently Driving";
+  // document.getElementById("subtitle").innerHTML = "There should be stats here but someone didn't get them done in time for demos";
   dataListener = gm.info.watchVehicleData(processData,processDataError,['brake_position','accelerator_position','wheel_angle'],100);
+  rotaryWatcher = gm.info.watchRotaryControl(handleRotary);
+
+  //hide ready to drive
+  readyToDrivePage.style.display = 'none';
+  statsPage.style.display = 'block';
 }
 
 function processData(data) {
@@ -86,9 +92,12 @@ function stopDrive() {
   console.log('brake array: ', brakePositionData);
   console.log('acceleration array', acceleratorPositionData);
   console.log('wheel angle array', wheelAngleData);
-  document.getElementById("title").innerHTML = "Drive Finished";
-  document.getElementById("subtitle").innerHTML = "Just one second while we crunch some numbers";
+  // document.getElementById("title").innerHTML = "Drive Finished";
+  // document.getElementById("subtitle").innerHTML = "Just one second while we crunch some numbers";
+
   gm.info.clearVehicleData(dataListener);
+  gm.info.clearRotaryControl(rotaryWatcher);
+
   var wcc = new WolframCloudCall();
   console.log("sending data to wolfram");
   var seconds = new Date() / 1000; //seconds since epoch
@@ -99,12 +108,12 @@ function stopDrive() {
       console.log(result);
       if (result == null || result == "Null") {
         //TODO: handle unsure case
-        document.getElementById("title").innerHTML = "Who are you?";
-        document.getElementById("subtitle").innerHTML = "Please let us know";
+        // document.getElementById("title").innerHTML = "Who are you?";
+        // document.getElementById("subtitle").innerHTML = "Please let us know";
       } else {
         //TODO: handle sure case
-        document.getElementById("title").innerHTML = "You must be:";
-        document.getElementById("subtitle").innerHTML = result;
+        // document.getElementById("title").innerHTML = "You must be:";
+        // document.getElementById("subtitle").innerHTML = result;
       }
     });
   });
@@ -198,35 +207,79 @@ p.callClassify = function(key, callback) {
 
 // Dashboard JS
 
+var currentlySelected = "top";
+
 function resetDash() {
 	$(".icon").removeClass("topGrad rightGrad bottomGrad leftGrad");
 	$(".lines").hide();
+  currentlySelected = null;
 }
 
-$( ".top" ).mouseover(function() {
+function selectTopStat() {
 	$(".info .inner").css({"left":"0"});
 	resetDash();
-	$(this).addClass("topGrad");
+	$(".top").addClass("topGrad");
 	$( ".lineTop" ).show();
-});
+  currentlySelected = "top";
+};
+$( ".top" ).mousedown(selectTopStat);
 
-$( ".right" ).mouseover(function() {
+function selectRightStat() {
 	$(".info .inner").css({"left":"-110px"});
 	resetDash()
-	$(this).addClass("rightGrad");
+	$(".right").addClass("rightGrad");
 	$( ".lineRight" ).show();
-});
+  currentlySelected = "right";
+};
+$( ".right" ).mousedown(selectRightStat);
 
-$( ".bottom" ).mouseover(function() {
+function selectBottomStat() {
 	$(".info .inner").css({"left":"-220px"});
 	resetDash()
-	$(this).addClass("bottomGrad");
+	$(".bottom").addClass("bottomGrad");
 	$( ".lineBottom" ).show();
-});
+  currentlySelected = "bottom";
+};
+$( ".bottom" ).mousedown(selectBottomStat);
 
-$( ".left" ).mouseover(function() {
+function selectLeftStat() {
 	$(".info .inner").css({"left":"-330px"});
 	resetDash()
-	$(this).addClass("leftGrad");
+	$(".left").addClass("leftGrad");
 	$( ".lineLeft" ).show();
-});
+  currentlySelected = "left";
+};
+$( ".left" ).mousedown(selectLeftStat);
+
+function handleRotary(eventlist) {
+  var event = eventlist[0];
+  if (event === 'RC_CW') {
+    switch (currentlySelected) {
+      case "top":
+        selectRightStat();
+        break;
+      case "right":
+        selectBottomStat();
+        break;
+      case "bottom":
+        selectLeftStat();
+        break;
+      default:
+        selectTopStat();
+    }
+  } else if (event === 'RC_CCW') {
+    switch (currentlySelected) {
+      case "top":
+        selectLeftStat();
+        break;
+      case "right":
+        selectTopStat();
+        break;
+      case "bottom":
+        selectRightStat();
+        break;
+      default:
+        selectBottomStat();
+    }
+  }
+}

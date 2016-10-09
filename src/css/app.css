@@ -104,7 +104,7 @@ body {
   transform: translate(-50%, -50%);
 
   background-color: #2c383a!important;
-  color: #34495e;
+  color: #f0f3f4!important;
   font-family: Trebuchet, Arial, sans-serif;
   text-align: center;
 }
@@ -311,12 +311,12 @@ height: 170px;
 float: left;
 padding-top: 3px;
 }
-
+/*
 .diamond {
 font-size: 8px;
 margin-top: 5px;
 margin-bottom: 5px;
-}
+}*/
 
 .iconLrg {
 width: 50px;
@@ -324,6 +324,7 @@ height: 50px;
 margin-right: auto;
 margin-left: auto;
 margin-bottom: 5px;
+margin-top: 5px;
 }
 
 /*LINES*/
