@@ -31,7 +31,6 @@
     <div id="wrapper">
       <!-- <div id="close"><img src="images/close.png" onclick="gm.system.closeApp()" alt="close"></div> -->
       <div class="main">
-        <div class ="container-fluid">
         	<!--Start-up Screen -->
 
         	<div id="start-up-page">
@@ -62,13 +61,17 @@
         		</form>
         	</div>
 
+          <div id="start-drive">
+            <h1>Ready to Drive</h1>
+            <h2>Start driving to begin displaying data.</h2>
+          </div>
 
         	<!-- Status Screen -->
 
         	<div id="stats-page">
-        		<div id = "status-body">
-        			<div class="wrapper">
-        				<div class="main">
+        		<div id="status-body">
+        			<div class="statsPageWrapper">
+        				<div class="statsPageMain">
         				<div class="lines lineTop"></div>
         				<div class="lines lineRight"></div>
         				<div class="lines lineLeft"></div>
@@ -170,12 +173,10 @@
         						</div>
         					</div><!--info-->
         				<div class="clear"></div>
-        				</div><!--main-->
-        			</div><!--wrapper-->
+              </div><!--statsPageMain-->
+            </div><!--statsPageWrapper-->
         		</div>
         	</div>
-
-        </div><!--container-fluid-->
       </div>
     </div>
 

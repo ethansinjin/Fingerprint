@@ -12,12 +12,15 @@ var lastBrake;
 var lastAccelerator;
 var lastWheelAngle;
 
-var startUpPage = document.getElementById("start-up-page")
+var pickDriverPage = document.getElementById("start-up-page")
 var newDriverPage = document.getElementById("new-driver");
 var statsPage = document.getElementById("stats-page");
+var readyToDrivePage = document.getElementById("start-drive");
 
+pickDriverPage.style.display = 'none';
 newDriverPage.style.display = 'none';
-startUpPage.style.display = 'none';
+readyToDrivePage.style.display = 'none';
+//statsPage.style.display = 'none';
 
 function watchSpeedCallback(speed) {
   if (speed == 0 && previousSpeed > 0) {
