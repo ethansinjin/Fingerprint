@@ -154,6 +154,8 @@ h2 {
 #stats-page {
 color: white;
 font-family: "Lucida Grande", Lucida, Verdana, sans-serif;
+position: relative;
+left: -200px;
 /*background: #e2e2e2;
 background: -moz-radial-gradient(center, ellipse cover,  #e2e2e2 0%, #b5b5b5 100%);
 background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#e2e2e2), color-stop(100%,#b5b5b5));
