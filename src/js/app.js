@@ -1,5 +1,6 @@
 // Your code goes here
 var d3 = require("d3");
+
 var previousSpeed = 0; //0=parked, 1-2=driving
 gm.system.watchSpeed(watchSpeedCallback);
 var dataListener; // id of vehicle data process
@@ -29,6 +30,14 @@ guessDriverPage.style.display = 'none';
 newDriverPage.style.display = 'none';
 //readyToDrivePage.style.display = 'none';
 statsPage.style.display = 'none';
+
+function resetToStart() {
+  pickDriverPage.style.display = 'none';
+  guessDriverPage.style.display = 'none';
+  newDriverPage.style.display = 'none';
+  readyToDrivePage.style.display = 'block';
+  statsPage.style.display = 'none';
+}
 
 function watchSpeedCallback(speed) {
   if (speed == 0 && previousSpeed > 0) {
@@ -129,7 +138,16 @@ function stopDrive() {
         guessDriverPage.style.display = 'none';
         newDriverPage.style.display = 'none';
         statsPage.style.display = 'none';
-        wcc.callListDrivers(listDriversForTraining);
+        wcc.callListDrivers(function(result) {
+          namesArray = result.split(",");
+
+          console.log(result);
+          $('#driver-select-button-list').empty();
+          for (i in namesArray) {
+            namesArray[i] = namesArray[i].replace(/[^A-Za-z0-9]/g, '');
+            addDriverButton(namesArray[i]);
+          }
+        });
       } else {
         // handle sure case
         document.getElementById("guess-h1").innerHTML = "Driver Recognized as:";
@@ -146,33 +164,23 @@ function stopDrive() {
   });
 }
 
-function listDriversForTraining(result) {
-  namesArray = result;
-  // assume the correct screen is already being displayed
-  //TODO: iterate through the array 'result'
-  // show a driver button for each of the names
-  // also show a new driver button
-  // regardless of which button pressed, train the data
-}
-
 function addDriverButton(userName) {
-  //Create an input type dynamically.
-  var element = document.createElement("input");
-  //Assign different attributes to the element.
-  element.type = "button";
-  element.value = userName; // Really? You want the default value to be the type string?
-  element.name = userName; // And the name too?
-  element.onclick = function() { // Note this is a function
-    alert("blabla");
+  var driverButton = $('<button/>', {'class': 'btn', 'type': 'button'}).append(
+      $('<span/>', {text: userName})
+  );
+  driverButton.mousedown = function() {
+    console.log("training function with:");
+    console.log(userName);
+    wcc.callTrainClassify(seconds,userName,function(result) {
+      resetToStart();
+    });
   };
-
-  var foo = document.getElementById("fooBar");
-  //Append the element in page (in span).
-  foo.appendChild(element);
+  $("#driver-select-button-list").append(
+      $('<div/>', {'class': 'col-sm-4'}).append(
+        driverButton
+      )
+  );
 }
-document.getElementById("btnAdd").onclick = function() {
-  add("text");
-};
 
 $( ".driver-select-manual" ).mousedown(showInputNewDriverScreen);
 function showInputNewDriverScreen() {
@@ -273,7 +281,7 @@ p.callTrainClassify = function(key, name, callback) {
   this._auxCall(url, args, callbackWrapper);
 };
 
-p.callListDrivers = function(key, callback) {
+p.callListDrivers = function(callback) {
   var url = "http://www.wolframcloud.com/objects/cce7421b-d215-4232-aadb-0ed3ac20c440";
   var args = {};
   var callbackWrapper = function(result) {
