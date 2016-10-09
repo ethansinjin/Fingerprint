@@ -24,7 +24,7 @@ pickDriverPage.style.display = 'none';
 guessDriverPage.style.display = 'none';
 newDriverPage.style.display = 'none';
 readyToDrivePage.style.display = 'none';
-//statsPage.style.display = 'none';
+statsPage.style.display = 'none';
 
 function watchSpeedCallback(speed) {
   if (speed == 0 && previousSpeed > 0) {
@@ -287,4 +287,37 @@ function handleRotary(eventlist) {
         selectBottomStat();
     }
   }
+}
+
+// graph generation
+
+function startGraph() {
+    var size = 40;
+
+    var speedData = d3.map(size),
+        RPMData   = d3.map(size);
+
+    var svg = d3.select(svg),
+        margin = {top: 0, right: 0, bottom: 1, left: 1},
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom,
+        gSpeed = svg.append("gSpeed").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        gRPM = svg.append("gRPM").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var xSpeed = d3.scaleLinear()
+        .domain([0, size - 1])
+        .range([0, width]);
+
+    var ySpeed = d3.scaleLinear()
+        .domain([0, 200])
+        .range([height, 0]);
+
+    var xRPM = d3.scaleLinear()
+        .domain([0, size - 1])
+        .range([0, width]);
+
+    var yRPM = d3.scaleLinear()
+        .domain([0, 10000])
+        .range([height, 0]);
+
 }
